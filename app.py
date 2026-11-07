@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from flask import Flask, render_template, request, session, redirect, url_for, flash
 from functools import wraps
 from database import init_db, seed_db
@@ -6,10 +7,21 @@ from services import (check_login, get_students, get_dashboard_stats, predict,
 
 app = Flask(__name__)
 app.secret_key = "dev-secret-key-change-in-production"
+=======
+from flask import Flask
+
+from backend.config import SECRET_KEY
+from backend.db import init_db, seed_db
+from backend.routes import register_routes
+
+app = Flask(__name__)
+app.secret_key = SECRET_KEY
+>>>>>>> origin/master
 
 init_db()
 seed_db()
 
+<<<<<<< HEAD
 
 def login_required(role):
     def decorator(f):
@@ -124,3 +136,12 @@ def student_me():
 def logout():
     session.clear()
     return redirect(url_for("role_select"))
+=======
+# All pages live in backend/routes/ (auth_routes, teacher_routes, student_routes)
+register_routes(app)
+
+
+if __name__ == "__main__":
+    # Run with:  python app.py   (or: flask run)   ->  http://127.0.0.1:5000
+    app.run(debug=True)
+>>>>>>> origin/master
