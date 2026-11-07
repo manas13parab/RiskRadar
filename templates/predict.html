@@ -1,0 +1,127 @@
+{% extends "teacher_layout.html" %}
+{% from "macros.html" import input, button, risk_badge, empty_state %}
+{% block title %}Predict — RiskRadar{% endblock %}
+{% block page_title %}Predict{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <!-- Form -->
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm dark:shadow-none p-5">
+    <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Enter Student Data</h2>
+    <form method="POST" id="predict-form" class="space-y-4">
+      <div>
+        <label for="student_id" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Student</label>
+        <select name="student_id" id="student_id" required
+          class="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 dark:border-zinc-700
+            bg-white dark:bg-zinc-800/50 text-zinc-900 dark:text-zinc-100 text-sm transition-colors
+            focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500
+            dark:focus:ring-indigo-400/40 dark:focus:border-indigo-400">
+          <option value="">Select a student</option>
+          {% for s in students %}
+            <option value="{{ s.id }}" {% if selected_student == s.id %}selected{% endif %}>{{ s.id }} — {{ s.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        {{ input("midterm", "Midterm", type="number", placeholder="0–100", min=0, max=100, step="0.1") }}
+        {{ input("assignments", "Assignments", type="number", placeholder="0–100", min=0, max=100, step="0.1") }}
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        {{ input("quizzes", "Quizzes", type="number", placeholder="0–100", min=0, max=100, step="0.1") }}
+        {{ input("participation", "Participation", type="number", placeholder="0–100", min=0, max=100, step="0.1") }}
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        {{ input("projects", "Projects", type="number", placeholder="0–100", min=0, max=100, step="0.1") }}
+        {{ input("attendance", "Attendance %", type="number", placeholder="0–100", min=0, max=100, step="0.1") }}
+      </div>
+      {{ input("study_hours", "Study Hours / Week", type="number", placeholder="0–100", min=0, max=100, step="0.1") }}
+
+      <div class="pt-2">
+        {{ button("Run Prediction", icon="zap", id="predict-btn") }}
+      </div>
+    </form>
+  </div>
+
+  <!-- Result panel -->
+  <div>
+    {% if result %}
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm dark:shadow-none p-5 space-y-6">
+      <div class="text-center">
+        <p class="text-sm text-zinc-500 dark:text-zinc-400 font-medium mb-1">Predicted Score</p>
+        <p class="text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{{ result.score }}</p>
+        <div class="mt-2">{{ risk_badge(result.risk) }}</div>
+      </div>
+
+      <!-- Progress bar with thresholds -->
+      <div>
+        <div class="relative h-3 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-visible">
+          {% set bar_color = "bg-rose-500" if result.risk == "High" else ("bg-amber-500" if result.risk == "Moderate" else "bg-emerald-500") %}
+          <div class="{{ bar_color }} h-full rounded-full transition-all" style="width: {{ result.score }}%"></div>
+          <!-- 60 mark -->
+          <div class="absolute top-0 h-full w-px bg-zinc-400 dark:bg-zinc-500" style="left: 60%">
+            <span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">60</span>
+          </div>
+          <!-- 70 mark -->
+          <div class="absolute top-0 h-full w-px bg-zinc-400 dark:bg-zinc-500" style="left: 70%">
+            <span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">70</span>
+          </div>
+        </div>
+        <div class="flex justify-between mt-2 text-[10px] text-zinc-400 dark:text-zinc-500 font-medium">
+          <span>High Risk</span>
+          <span>Moderate</span>
+          <span>Low Risk</span>
+        </div>
+      </div>
+
+      <!-- Top factors -->
+      <div>
+        <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-3">Top Contributing Factors</h3>
+        <div class="space-y-3">
+          {% for f in result.factors %}
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-sm text-zinc-700 dark:text-zinc-300">{{ f.name }}</span>
+              <span class="text-sm font-semibold
+                {% if f.impact == 'positive' %}text-emerald-600 dark:text-emerald-400
+                {% elif f.impact == 'negative' %}text-rose-600 dark:text-rose-400
+                {% else %}text-zinc-600 dark:text-zinc-400{% endif %}">{{ f.value }}</span>
+            </div>
+            <div class="h-2 rounded-full bg-zinc-100 dark:bg-zinc-800">
+              {% set bar_color = "bg-emerald-500" if f.impact == "positive" else ("bg-rose-500" if f.impact == "negative" else "bg-zinc-400") %}
+              <div class="{{ bar_color }} h-full rounded-full" style="width: {{ f.value }}%"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Recommendations -->
+      <div>
+        <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-3">Recommendations</h3>
+        <ul class="space-y-2">
+          {% for tip in result.tips %}
+          <li class="flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <i data-lucide="lightbulb" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></i>
+            {{ tip }}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    {% else %}
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm dark:shadow-none">
+      {{ empty_state("brain", "No prediction yet", "Fill in the student data and click Run Prediction to see results.") }}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  document.getElementById('predict-form').addEventListener('submit', function() {
+    var btn = document.getElementById('predict-btn');
+    btn.disabled = true;
+    btn.querySelector('span').textContent = 'Running…';
+  });
+</script>
+{% endblock %}

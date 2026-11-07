@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}RiskRadar — Academic Risk Detection{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+  <div class="w-full max-w-lg text-center mb-12">
+    <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-500/10 mb-6">
+      <i data-lucide="shield-check" class="w-7 h-7 text-indigo-600 dark:text-indigo-400"></i>
+    </div>
+    <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 mb-3">
+      RiskRadar
+    </h1>
+    <p class="text-lg text-zinc-500 dark:text-zinc-400 font-medium">
+      Early detection. Better outcomes.
+    </p>
+  </div>
+
+  <div class="w-full max-w-lg">
+    <p class="text-sm font-medium text-zinc-500 dark:text-zinc-400 text-center mb-4">Continue as</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <a href="{{ url_for('login', role='teacher') }}"
+         class="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm dark:shadow-none p-6
+                hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md transition-all text-center">
+        <div class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mx-auto mb-4
+                    group-hover:bg-indigo-500/20 transition-colors">
+          <i data-lucide="graduation-cap" class="w-6 h-6 text-indigo-600 dark:text-indigo-400"></i>
+        </div>
+        <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-1">Teacher</h2>
+        <p class="text-sm text-zinc-500 dark:text-zinc-400">Dashboard, predictions &amp; analytics</p>
+      </a>
+
+      <a href="{{ url_for('login', role='student') }}"
+         class="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm dark:shadow-none p-6
+                hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md transition-all text-center">
+        <div class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mx-auto mb-4
+                    group-hover:bg-indigo-500/20 transition-colors">
+          <i data-lucide="user" class="w-6 h-6 text-indigo-600 dark:text-indigo-400"></i>
+        </div>
+        <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-1">Student</h2>
+        <p class="text-sm text-zinc-500 dark:text-zinc-400">Your scores &amp; recommendations</p>
+      </a>
+    </div>
+  </div>
+
+  <div class="mt-12 flex items-center gap-2">
+    <button id="theme-toggle" class="p-2 rounded-xl text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors" title="Toggle theme">
+      <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+      <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+    </button>
+  </div>
+</div>
+{% endblock %}

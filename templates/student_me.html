@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% from "macros.html" import topbar, risk_badge, empty_state %}
+{% block title %}My Performance — RiskRadar{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex flex-col">
+  {{ topbar("My Performance") }}
+
+  <main class="flex-1 p-4 lg:p-6">
+    <div class="max-w-2xl mx-auto">
+      <!-- Greeting -->
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+          Hello, {{ session.user.name.split()[0] }}
+        </h2>
+        <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Here's your latest academic performance summary.</p>
+      </div>
+
+      {% if latest %}
+      <!-- Score card -->
+      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm dark:shadow-none p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-100">Latest Prediction</h3>
+          <span class="text-xs text-zinc-500 dark:text-zinc-400">{{ latest.date }}</span>
+        </div>
+
+        <div class="text-center mb-6">
+          <p class="text-6xl font-bold tracking-tight
+            {% if latest.risk == 'High' %}text-rose-600 dark:text-rose-400
+            {% elif latest.risk == 'Moderate' %}text-amber-600 dark:text-amber-400
+            {% else %}text-emerald-600 dark:text-emerald-400{% endif %}">{{ latest.score }}</p>
+          <div class="mt-2">{{ risk_badge(latest.risk) }}</div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="mb-6">
+          <div class="relative h-3 rounded-full bg-zinc-100 dark:bg-zinc-800">
+            {% set bar_color = "bg-rose-500" if latest.risk == "High" else ("bg-amber-500" if latest.risk == "Moderate" else "bg-emerald-500") %}
+            <div class="{{ bar_color }} h-full rounded-full" style="width: {{ latest.score }}%"></div>
+            <div class="absolute top-0 h-full w-px bg-zinc-400 dark:bg-zinc-500" style="left: 60%">
+              <span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">60</span>
+            </div>
+            <div class="absolute top-0 h-full w-px bg-zinc-400 dark:bg-zinc-500" style="left: 70%">
+              <span class="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-medium text-zinc-500 dark:text-zinc-400">70</span>
+            </div>
+          </div>
+          <div class="flex justify-between mt-2 text-[10px] text-zinc-400 dark:text-zinc-500 font-medium">
+            <span>High Risk</span>
+            <span>Moderate</span>
+            <span>Low Risk</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- What's pulling the score down -->
+      {% if latest.risk != 'Low' %}
+      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm dark:shadow-none p-6 mb-6">
+        <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-3">Areas for Improvement</h3>
+        <div class="space-y-3">
+          {% if latest.score < 60 %}
+          <div class="flex items-start gap-3 text-sm">
+            <div class="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center shrink-0">
+              <i data-lucide="trending-down" class="w-4 h-4 text-rose-600 dark:text-rose-400"></i>
+            </div>
+            <div>
+              <p class="font-medium text-zinc-900 dark:text-zinc-100">Your score is below the passing threshold</p>
+              <p class="text-zinc-500 dark:text-zinc-400 mt-0.5">Focus on improving your weakest subjects and maintaining attendance above 85%.</p>
+            </div>
+          </div>
+          {% endif %}
+          <div class="flex items-start gap-3 text-sm">
+            <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+              <i data-lucide="book-open" class="w-4 h-4 text-amber-600 dark:text-amber-400"></i>
+            </div>
+            <div>
+              <p class="font-medium text-zinc-900 dark:text-zinc-100">Increase study time</p>
+              <p class="text-zinc-500 dark:text-zinc-400 mt-0.5">Aim for at least 10–15 hours of focused study per week, with regular breaks.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 text-sm">
+            <div class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center shrink-0">
+              <i data-lucide="users" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
+            </div>
+            <div>
+              <p class="font-medium text-zinc-900 dark:text-zinc-100">Seek support</p>
+              <p class="text-zinc-500 dark:text-zinc-400 mt-0.5">Visit office hours, form study groups, or use tutoring services available on campus.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Next steps -->
+      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm dark:shadow-none p-6">
+        <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-3">Next Steps</h3>
+        <ul class="space-y-2">
+          {% if latest.risk == 'High' %}
+          <li class="flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <i data-lucide="circle-check" class="w-4 h-4 text-indigo-500 shrink-0 mt-0.5"></i>
+            Schedule a meeting with your academic advisor this week.
+          </li>
+          <li class="flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <i data-lucide="circle-check" class="w-4 h-4 text-indigo-500 shrink-0 mt-0.5"></i>
+            Review missed assignments and create a catch-up plan.
+          </li>
+          <li class="flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <i data-lucide="circle-check" class="w-4 h-4 text-indigo-500 shrink-0 mt-0.5"></i>
+            Attend all upcoming classes and track your attendance.
+          </li>
+          {% elif latest.risk == 'Moderate' %}
+          <li class="flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <i data-lucide="circle-check" class="w-4 h-4 text-indigo-500 shrink-0 mt-0.5"></i>
+            Identify your two weakest areas and dedicate extra time to them.
+          </li>
+          <li class="flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <i data-lucide="circle-check" class="w-4 h-4 text-indigo-500 shrink-0 mt-0.5"></i>
+            Set up a consistent study schedule and stick to it.
+          </li>
+          {% else %}
+          <li class="flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <i data-lucide="circle-check" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i>
+            Great work! Keep up the consistent effort.
+          </li>
+          <li class="flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <i data-lucide="circle-check" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i>
+            Consider mentoring peers who could use support.
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+
+      {% else %}
+      <!-- Empty state -->
+      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm dark:shadow-none">
+        {{ empty_state("bar-chart-3", "No predictions yet", "Your teacher hasn't run a prediction for you yet. Check back later for your results.") }}
+      </div>
+      {% endif %}
+    </div>
+  </main>
+</div>
+{% endblock %}

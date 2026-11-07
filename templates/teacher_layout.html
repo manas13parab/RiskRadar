@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% from "macros.html" import topbar %}
+
+{% block body %}
+<div class="flex min-h-screen">
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm hidden lg:hidden"></div>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed lg:sticky top-0 left-0 z-50 lg:z-auto w-64 h-screen bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-200">
+    <!-- Logo -->
+    <div class="flex items-center gap-2.5 px-5 h-16 border-b border-zinc-200 dark:border-zinc-800 shrink-0">
+      <div class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+        <i data-lucide="shield-check" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
+      </div>
+      <span class="text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100">RiskRadar</span>
+    </div>
+
+    <!-- Nav links -->
+    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      {% set nav_items = [
+        ("teacher_dashboard", "Dashboard", "layout-dashboard"),
+        ("predict_page", "Predict", "brain"),
+        ("students_list", "Students", "users"),
+        ("upload", "Upload", "upload"),
+        ("insights", "Insights", "bar-chart-3"),
+      ] %}
+      {% for endpoint, label, icon in nav_items %}
+        <a href="{{ url_for(endpoint) }}"
+           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+             {% if request.endpoint == endpoint %}
+               bg-indigo-500/10 text-indigo-600 dark:text-indigo-400
+             {% else %}
+               text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100
+             {% endif %}">
+          <i data-lucide="{{ icon }}" class="w-[18px] h-[18px]"></i>
+          {{ label }}
+        </a>
+      {% endfor %}
+    </nav>
+
+    <!-- User section -->
+    <div class="px-3 py-4 border-t border-zinc-200 dark:border-zinc-800 shrink-0">
+      <div class="flex items-center gap-3 px-3 py-2">
+        <div class="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0">
+          <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400">{{ session.user.name[0] }}</span>
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{{ session.user.name }}</p>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400">Teacher</p>
+        </div>
+        <a href="{{ url_for('logout') }}" class="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors" title="Logout">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <div class="flex-1 flex flex-col min-w-0">
+    {{ topbar(self.page_title(), show_sidebar_toggle=true) }}
+    <main class="flex-1 p-4 lg:p-6">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
