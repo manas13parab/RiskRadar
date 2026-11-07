@@ -1,0 +1,138 @@
+{% extends "teacher_layout.html" %}
+{% from "macros.html" import empty_state %}
+{% block title %}Insights — RiskRadar{% endblock %}
+{% block page_title %}Insights{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+  <p class="text-sm text-zinc-500 dark:text-zinc-400">Model performance metrics and feature analysis. Charts will be populated once the ML model is connected.</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <!-- Feature importance -->
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm dark:shadow-none p-5">
+    <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Feature Importance</h3>
+    <div class="space-y-3">
+      {% set features = [("Midterm", 85), ("Assignments", 72), ("Attendance", 68), ("Projects", 55), ("Quizzes", 48), ("Participation", 35), ("Study Hours", 22)] %}
+      {% for name, value in features %}
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-sm text-zinc-700 dark:text-zinc-300">{{ name }}</span>
+          <span class="text-xs font-semibold text-zinc-500 dark:text-zinc-400">{{ value }}%</span>
+        </div>
+        <div class="h-2 rounded-full bg-zinc-100 dark:bg-zinc-800">
+          <div class="h-full rounded-full bg-indigo-500" style="width: {{ value }}%"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Model accuracy -->
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm dark:shadow-none p-5">
+    <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Model Accuracy</h3>
+    <div class="flex items-center justify-center h-64">
+      <canvas id="accuracyChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Risk distribution trend -->
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm dark:shadow-none p-5">
+    <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Risk Trend Over Semesters</h3>
+    <div class="h-64">
+      <canvas id="riskTrend"></canvas>
+    </div>
+  </div>
+
+  <!-- Explanation -->
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm dark:shadow-none p-5">
+    <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-3">How Predictions Work</h3>
+    <div class="space-y-3 text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+      <p>RiskRadar uses a weighted scoring model to assess academic risk based on seven key factors: midterm scores, assignments, quizzes, participation, projects, attendance, and study hours.</p>
+      <p>Each factor is weighted according to its correlation with overall academic success. The resulting score determines the risk band:</p>
+      <div class="flex flex-col gap-2 mt-3">
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400">High</span>
+          <span>Score below 60 — immediate intervention recommended</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400">Moderate</span>
+          <span>Score 60–69 — monitor closely, suggest improvements</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">Low</span>
+          <span>Score 70+ — on track, encourage continued effort</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var isDark = document.documentElement.classList.contains('dark');
+
+  // Accuracy donut
+  new Chart(document.getElementById('accuracyChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Correct', 'Incorrect'],
+      datasets: [{
+        data: [87.5, 12.5],
+        backgroundColor: ['rgba(99,102,241,0.15)', isDark ? 'rgba(63,63,70,0.5)' : 'rgba(228,228,231,0.8)'],
+        borderColor: ['rgb(99,102,241)', isDark ? '#3f3f46' : '#e4e4e7'],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      cutout: '70%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { padding: 16, usePointStyle: true, pointStyleWidth: 8, color: isDark ? '#a1a1aa' : '#71717a', font: { family: 'Inter', size: 13 } }
+        }
+      }
+    }
+  });
+
+  // Risk trend
+  new Chart(document.getElementById('riskTrend'), {
+    type: 'bar',
+    data: {
+      labels: ['Fall 2024', 'Spring 2025', 'Fall 2025', 'Spring 2026'],
+      datasets: [
+        { label: 'High', data: [12, 10, 8, 6], backgroundColor: 'rgba(244,63,94,0.2)', borderColor: 'rgb(244,63,94)', borderWidth: 1, borderRadius: 6 },
+        { label: 'Moderate', data: [8, 9, 7, 5], backgroundColor: 'rgba(245,158,11,0.2)', borderColor: 'rgb(245,158,11)', borderWidth: 1, borderRadius: 6 },
+        { label: 'Low', data: [15, 18, 22, 25], backgroundColor: 'rgba(16,185,129,0.2)', borderColor: 'rgb(16,185,129)', borderWidth: 1, borderRadius: 6 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { padding: 16, usePointStyle: true, pointStyleWidth: 8, color: isDark ? '#a1a1aa' : '#71717a', font: { family: 'Inter', size: 12 } }
+        }
+      },
+      scales: {
+        y: {
+          stacked: true,
+          grid: { color: isDark ? 'rgba(63,63,70,0.5)' : 'rgba(228,228,231,0.8)' },
+          ticks: { color: isDark ? '#71717a' : '#a1a1aa', font: { family: 'Inter', size: 11 } }
+        },
+        x: {
+          stacked: true,
+          grid: { display: false },
+          ticks: { color: isDark ? '#71717a' : '#a1a1aa', font: { family: 'Inter', size: 11 } }
+        }
+      }
+    }
+  });
+});
+</script>
+{% endblock %}
