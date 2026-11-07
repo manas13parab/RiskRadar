@@ -6,4 +6,8 @@ from ml import config
 
 def split_data(X, y):
     return train_test_split(X, y, test_size=config.TEST_SIZE,
+<<<<<<< HEAD
                             random_state=config.RANDOM_STATE)
+=======
+                            random_state=config.RANDOM_STATE)
+>>>>>>> origin/master

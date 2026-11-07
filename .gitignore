@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+venv/
+.venv/
+
+# macOS / editors
+.DS_Store
+.vscode/
+.idea/
+
+# SQLite temp files (riskradar.db itself is kept so the database does not need re-seeding)
+*.db-wal
+*.db-shm

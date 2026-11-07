@@ -16,4 +16,8 @@ def check_columns(df):
 def load_data(csv_path=None):
     df = pd.read_csv(csv_path or config.CSV_PATH)
     check_columns(df)
+<<<<<<< HEAD
     return df
+=======
+    return df
+>>>>>>> origin/master
