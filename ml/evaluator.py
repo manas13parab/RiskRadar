@@ -26,8 +26,4 @@ def print_feature_importance(model):
     print(f"\n--- Feature Importance ---")
     for feat, imp in sorted(zip(config.FEATURES, model.feature_importances_), key=lambda x: -x[1]):
         bar = "█" * int(imp * 50)
-<<<<<<< HEAD
         print(f"  {feat:25s}: {imp:.4f}  {bar}")
-=======
-        print(f"  {feat:25s}: {imp:.4f}  {bar}")
->>>>>>> origin/master
