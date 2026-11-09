@@ -29,8 +29,4 @@ def get_model():
 
 def reset_cache():
     global _model
-<<<<<<< HEAD
     _model = None
-=======
-    _model = None
->>>>>>> origin/master
